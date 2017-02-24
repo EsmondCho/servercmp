@@ -1,0 +1,114 @@
+1. 환경
+- ubuntu 16.04
+- pycharm
+- mongodb 3.4.2
+- pymongo 3.4
+- Django 1.6.11
+- beautifulsoup 4
+- redis 3.0.6 
+- python 2.7
+- selenium 3.0.2
+- Pillow 4.0
+- requests 2.13.0
+- uWSGI 2.0.14
+- nginx 1.10.0
+- gitlab
+
+
+2. API
+
+< Client -> Django >
+
+/api/v1/login/signup								(POST)
+/api/v1/login/signin								(POST)
+/api/v1/login/signout								(POST)
+
+/api/v1/users/:user_id								(GET)개인 페이지
+
+/api/v1/users/:user_id/friends							(GET)친구 리스트 return
+/api/v1/users/:user_id/friend_requests						(GET)친구 요청 리스트 return
+/api/v1/users/:user_id/friend_requests/create					(POST)친구 요청 보내기 - param : To_id
+/api/v1/users/:user_id/friend_requests/:friend_request_id/update		(POST)받은 요청중 특정 요청에 응답 - param : answer
+/api/v1/users/:user_id/friend_requests/:friend_request_id/delete		(DELETE)응답한 요청 삭제	
+
+/api/v1/users/:user_id/profile/							(GET)유저 프로필사진 url return
+/api/v1/users/:user_id/profile/update						(POST)유저 프로필사진 upload - param : image
+
+/api/v1/users/:user_id/articles							(GET)유저 아티클 리스트 return
+/api/v1/users/:user_id/articles/create						(POST)아티클 생성 - param : tag, text, image(null=True)
+/api/v1/users/:user_id/articles/:article_id/update				(POST)아티클 수정 - param : tag, text, image(null=True)
+/api/v1/users/:user_id/articles/:article_id/delete				(DELETE)아티클 삭제
+/api/v1/users/:user_id/articles/:article_id/comments				(GET)댓글 리스트 return
+/api/v1/users/:user_id/articles/:article_id/comments/create			(POST)댓글 생성 - param : comment
+/api/v1/users/:user_id/articles/:article_id/comments/:comment_id/update		(POST)댓글 수정 - param : comment
+/api/v1/users/:user_id/articles/:article_id/comments/:comment_id/delete		(DELETE)댓글 삭제
+
+/api/v1/users/:user_id/artures							(GET)팔로우한 아쳐 리스트 return
+
+/api/v1/artures/:user_id/							(GET)아쳐 정보 return
+/api/v1/artures/:user_id/follow							(POST)아쳐 팔로우 - param : user_id
+
+
+<Django -> Node.JS>
+
+api/v1/users/:user_id/signup 							(GET) 회원가입
+api/v1/users/:user_id/dropout 							(GET) 회원탈퇴
+
+api/v1/users/:user_id/follow/:arture_id						(GET) 팔로우
+api/v1/users/:user_id/unfollow/:arture_id     					(GET) 언팔로우
+
+
+api/v1/users/:user_id/add_friend/:user_id  					(GET)  친구 추가
+api/v1/users/:user_id/defriend/:user_id   					(GET) 친구 삭제
+
+api/v1/users/:user_id/create_article/:article_id/tag/:tag_id  			(GET) 글 작성
+api/v1/users/:user_id/delete_article/:article_id /tag/:tag _id 			(GET) 글 삭제  
+ 
+
+
+3. 기능
+1) login
+ 디렉터리 : arture/login
+ 함수 : def authenticated(request), def signup(request), def signin(request), signout(request)
+ 역할
+  - signup 또는 signin시에 random string을 redis와 session에 저장함
+  - Client가 Django에게 보내는 url에 랜덤스트링을 token으로 붙여서 전송함
+  - 이후 User가 하는 모든 행동마다 앞서서 authenticated 함수 실행
+  - signup/signin시 세션에 로그인 정보 저장, signout시 세션 만료
+
+2) eacharture
+ 디렉터리 : arture/eacharture
+ 함수 : get_arture(request, arture_id), follow_arture(request, arture_id)
+ 역할
+  - url을 통해 DB에 저장된 arture의 objectID를 넘김으로서 해당 arture 정보들을 return
+  - url을 통해 DB에 저장된 arture의 objectID를 넘김으로서 해당 arture를 팔로우
+
+3) users
+ 디렉터리 : arture/users
+ 함수 : def datetime_to_json(ob), def get_profile_page(request, user_id), def newsfeed(request, user_id), def upload_picture(request, user_id)
+def get_profile_picture(request, user_id), def upload_profile_picture(request, user_id), def get_friend_list(request, user_id)
+, def get_friend_request_list(request, user_id), def create_friend_request(request, user_id), def response_to_friend_request(request, user_id, request_id),
+def delete_in_request_list(request, user_id, request_id), def get_article_list(request, user_id), def create_article(request, user_id),
+def update_article(request, user_id, article_id), def delete_article(request, user_id, article_id), def get_comment_list(request, user_id, article_id),
+def create_comment(request, user_id, article_id), def update_comment(request, user_id, article_id, comment_id), def delete_comment(request, user_id, article_id, comment_id),
+def get_following_arture_list(request, user_id)
+ 역할
+  - 프로필 정보와 함께 페이지 템플릿 rendering
+  - 각 유저에 대한 뉴스피드 글들을 return
+  - 프로필 사진 올리기
+  - 프로필 사진 return
+  - 친구 리스트, 친구 요청 리스트 리턴받기
+  - 친구요청 생성, 친구요청에 반응하기
+  - 아티클 올리기, 아티클들 리턴받기, 아티클 update하기, delete하기
+  - 코멘트 생성, 수정, 삭제하기, 코멘트 리스트 return 
+  - 아쳐 팔로우하기, 팔로우 리스트 받아오기
+
+4) crawling
+ 디렉터리 arture/arture
+ 함수 : arture_crawler(request, start_page, finish_page), review_crawler(request, start_page, finish_page), make_follow(request),
+make_friend(request), reset_userId(request), insert_image_into_movie(request), article_tage_objects_to_objectId(request), change_id(request)
+ 역할 
+  - beautiful soup 사용
+  - 네이버 영화에서 영화 제목, 영화 정보, 출연 배우들 정보, 감독 정보, 해당 영화에 대한 리뷰 내용, 리뷰 post한 아이디, 평점을 크롤링해옴
+  - 기존의 db에 크롤링한 내용 추가
+  - 단순 Insert가 아니라 각각의 arture에 대한 관계까지 insert함 ( e.g. 영화와 배우 arture들 사이에는 서로의 objectId를 가지고있음)

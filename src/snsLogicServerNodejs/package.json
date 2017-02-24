@@ -1,0 +1,22 @@
+{
+  "name": "node.api.server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "body-parser": "^1.16.0",
+    "debug": "^2.6.0",
+    "express": "^4.14.0",
+    "mongoose": "^4.7.7",
+    "promise": "^7.1.1",
+    "queue": "^4.2.1",
+    "redis": "^2.6.5",
+    "redis-promise": "^0.1.0"
+  }
+}
